@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://gnkr8.github.io/2018/08/17/k8s-test-infra/</loc>
+    <lastmod>2018-08-17T00:43:14+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://gnkr8.github.io/</loc>
     <lastmod>2018-08-15T09:06:36+09:00</lastmod>
   </url>
@@ -10,6 +15,11 @@
   <url>
     <loc>https://gnkr8.github.io/categories/</loc>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://gnkr8.github.io/k8s/</loc>
+    <lastmod>2018-08-17T00:43:14+09:00</lastmod>
   </url>
   
   <url>
