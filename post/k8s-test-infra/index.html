@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko-kr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    
+
+    
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans:400|Old+Standard+TT:400' rel='stylesheet' type='text/css'>
+    
+
+    <link rel="icon" type="image/png" href="/favicon_16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon_32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon_128x128.png" sizes="128x128">
+
+    <title>
+      
+      
+         자동화 e2e 테스트 환경 구축 
+      
+    </title>
+    <link rel="canonical" href="https://gnkr8.github.io/post/k8s-test-infra/">
+
+    <style>
+  * {
+    border:0;
+    font:inherit;
+    font-size:100%;
+    vertical-align:baseline;
+    margin:0;
+    padding:0;
+    color: black;
+    text-decoration-skip: ink;
+  }
+
+  body {
+    font-family:'Open Sans', 'Myriad Pro', Myriad, sans-serif;
+    font-size:17px;
+    line-height:160%;
+    color:#1d1313;
+    max-width:700px;
+    margin:auto;
+  }
+
+  p {
+    margin: 20px 0;
+  }
+
+  a img {
+    border:none;
+  }
+
+  img {
+    margin: 10px auto 10px auto;
+    max-width: 100%;
+    display: block;
+  }
+
+  .left-justify {
+    float: left;
+  }
+
+  .right-justify {
+    float:right;
+  }
+
+  pre, code {
+    font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    background-color: #f7f7f7;
+  }
+
+  code {
+    font-size: 12px;
+    padding: 4px;
+  }
+
+  pre {
+    margin-top: 0;
+    margin-bottom: 16px;
+    word-wrap: normal;
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+  }
+
+  pre>code {
+    padding: 0;
+    margin: 0;
+    font-size: 100%;
+    word-break: normal;
+    white-space: pre;
+    background: transparent;
+    border: 0;
+  }
+
+  pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+  }
+
+  pre code::before,
+  pre code::after {
+    content: normal;
+  }
+
+  em,q,em,dfn {
+    font-style:italic;
+  }
+
+  .sans,html .gist .gist-file .gist-meta {
+    font-family:"Open Sans","Myriad Pro",Myriad,sans-serif;
+  }
+
+  .mono,pre,code,tt,p code,li code {
+    font-family:Menlo,Monaco,"Andale Mono","lucida console","Courier New",monospace;
+  }
+
+  .heading,.serif,h1,h2,h3 {
+    font-family:"Old Standard TT",serif;
+  }
+
+  strong {
+    font-weight:600;
+  }
+
+  q:before {
+    content:"\201C";
+  }
+
+  q:after {
+    content:"\201D";
+  }
+
+  del,s {
+    text-decoration:line-through;
+  }
+
+  blockquote {
+    font-family:"Old Standard TT",serif;
+    text-align:center;
+    padding:50px;
+  }
+
+  blockquote p {
+    display:inline-block;
+    font-style:italic;
+  }
+
+  blockquote:before,blockquote:after {
+    font-family:"Old Standard TT",serif;
+    content:'\201C';
+    font-size:35px;
+    color:#403c3b;
+  }
+
+  blockquote:after {
+    content:'\201D';
+  }
+
+  hr {
+    width:40%;
+    height: 1px;
+    background:#403c3b;
+    margin: 25px auto;
+  }
+
+  h1 {
+    font-size:35px;
+  }
+
+  h2 {
+    font-size:28px;
+  }
+
+  h3 {
+    font-size:22px;
+    margin-top:18px;
+  }
+
+  h1 a,h2 a,h3 a {
+    text-decoration:none;
+  }
+
+  h1,h2 {
+    margin-top:28px;
+  }
+
+  #sub-header, time {
+    color:#403c3b;
+    font-size:13px;
+  }
+
+  #sub-header {
+    margin: 0 4px;
+  }
+
+  #nav h1 a {
+    font-size:35px;
+    color:#1d1313;
+    line-height:120%;
+  }
+
+  .posts_listing a,#nav a {
+    text-decoration: none;
+  }
+
+  li {
+    margin-left: 20px;
+  }
+
+  ul li {
+    margin-left: 5px;
+  }
+
+  ul li {
+    list-style-type: none;
+  }
+  ul li:before {
+    content:"\00BB \0020";
+  }
+
+  #nav ul li:before, .posts_listing li:before {
+    content:'';
+    margin-right:0;
+  }
+
+  #content {
+    text-align:left;
+    width:100%;
+    font-size:15px;
+    padding:60px 0 80px;
+  }
+
+  #content h1,#content h2 {
+    margin-bottom:5px;
+  }
+
+  #content h2 {
+    font-size:25px;
+  }
+
+  #content .entry-content {
+    margin-top:15px;
+  }
+
+  #content time {
+    margin-left:3px;
+  }
+
+  #content h1 {
+    font-size:30px;
+  }
+
+  .highlight {
+    margin: 10px 0;
+  }
+
+  .posts_listing {
+    margin:0 0 50px;
+  }
+
+  .posts_listing li {
+    margin:0 0 25px 15px;
+  }
+
+  .posts_listing li a:hover,#nav a:hover {
+    text-decoration: underline;
+  }
+
+  #nav {
+    text-align:center;
+    position:static;
+    margin-top:60px;
+  }
+
+  #nav ul {
+    display: table;
+    margin: 8px auto 0 auto;
+  }
+
+  #nav li {
+    list-style-type:none;
+    display:table-cell;
+    font-size:15px;
+    padding: 0 20px;
+  }
+
+  #links {
+    margin: 50px 0 0 0;
+  }
+
+  #links :nth-child(2) {
+    float:right;
+  }
+
+  #not-found {
+    text-align: center;
+  }
+
+  #not-found a {
+    font-family:"Old Standard TT",serif;
+    font-size: 200px;
+    text-decoration: none;
+    display: inline-block;
+    padding-top: 225px;
+  }
+
+  @media (max-width: 750px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:28px;
+    }
+
+    #nav li {
+      font-size:13px;
+      padding: 0 15px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:50px;
+      font-size:14px;
+    }
+
+    #content h1 {
+      font-size:25px;
+    }
+
+    #content h2 {
+      font-size:22px;
+    }
+
+    .posts_listing li div {
+      font-size:12px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    body {
+      padding-left:20px;
+      padding-right:20px;
+    }
+
+    #nav h1 a {
+      font-size:22px;
+    }
+
+    #nav li {
+      font-size:12px;
+      padding: 0 10px;
+    }
+
+    #content {
+      margin-top:0;
+      padding-top:20px;
+      font-size:12px;
+    }
+
+    #content h1 {
+      font-size:20px;
+    }
+
+    #content h2 {
+      font-size:18px;
+    }
+
+    .posts_listing li div{
+      font-size:12px;
+    }
+  }
+</style>
+
+
+    
+  </head>
+
+  <body>
+    <section id=nav>
+      <h1><a href="/">K</a></h1>
+      <ul>
+        
+          <li><a href="/about">About</a></li>
+        
+      </ul>
+    </section>
+
+
+<section id=content>
+  <h1> 자동화 e2e 테스트 환경 구축 </h1>
+
+  
+    <div id=sub-header>
+      August 2018 · 3 minute read
+    </div>
+  
+
+  <div class="entry-content">
+    <p><em>kubernetes/test-infra 이용해서 자동화 e2e 테스트 환경 구축 이라는 주제로 첫 글</em></p>
+
+<p>쿠버네티스는 3개월 안팎의 빠른 릴리즈 주기, 다양한 플랫폼 지원, 사용자 입장에서 어떤 플랫폼이든 매우 유사한 사용자 경험을 제공한다. 지금도 액티브한 릴리즈 브랜치가 4개 이상 존재하고, 최근 한달 수백명의 컨트뷰터로부터 만들어지는 커밋과 수백여개의 PR, 4만여개의 스타는 커뮤니티에게 매우 큰 도움이 아닐 수 없다. 하지만 커뮤니티 owner 입장에서 본다면 리뷰와 같은 작업은 꽤 큰 노동이 될거라고 본다. 지금도 975개의 PR이 열려있고 39,766개가 처리되었다.</p>
+
+<p>커뮤니티에서 릴리즈 대상이 되는 코드가 stable 하다는 판단과 빠른 릴리즈 주기를 만족하는 모습은 깊은 인상을 준다. 노력없이는 다양한 플랫폼 지원, 동일한 사용자 경험, 무수히 많은 참여를 감당할 수 없다. 이것이 이루어지는 곳에서 쓰는 방법이나 도구가 궁금했고 대단하게도 쿠버네티스 커뮤니티에선 CLA, PR 리뷰를 위한 도구, bot, e2e 테스트, 테스트 리포트 등의 코드가 모두 공개되어있다. 대략 살펴봤을 땐 <a href="https://github.com/kubernetes/kubernetes">kubernetes/kubernetes</a> 만을 위한 솔루션은 아니었다. 코드 또한 손쉽게 변경 가능했기때문에 진지하게 살펴봤다.</p>
+
+<p>이를 이용해 회사에서 만드는 제품을 다양한 상황에서 다양한 시나리오를 반복적으로 테스트하려고 한다.
+내 최소 요구사항은 아래 상황을 기반으로 다양한 시나리오를 태운다. (주로 e2e test 목적)</p>
+
+<ul>
+<li>정상적인 노드들과 정상적인 클라이언트 간 기능 테스트</li>
+<li>비정상적인 클라이언트 접근</li>
+<li>비정상적인 노드</li>
+<li>악의적인 노드와 클라이언트가 포함된 경우</li>
+<li>다양한 네트워크 구성</li>
+</ul>
+
+<p><strong>먼저, 쿠버네티스 커뮤니티에서 공개한 코드에대한 소개부터.</strong></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Language</td>
+<td>Go</td>
+</tr>
+
+<tr>
+<td>Github</td>
+<td><a href="https://github.com/kubernetes/test-infra">https://github.com/kubernetes/test-infra</a></td>
+</tr>
+
+<tr>
+<td>Prow Web UI</td>
+<td><a href="https://prow.k8s.io/">https://prow.k8s.io/</a></td>
+</tr>
+</tbody>
+</table>
+
+<p>kubernetes pull requests <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> 중 몇몇 PR을 보면 k8s-ci-robot 계정과 리뷰어의 활동을 볼 수 있다. 대화형 방식으로 진행하는 걸 볼 수 있고 각 Job 실행이 성공적으로 끝나는지 체크한다. 그 외에 CLA 체크도 하고 머지를 할 수 있나 검증도 한다. <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup></p>
+
+<p><strong>내 요구사항</strong></p>
+
+<ul>
+<li>e2e 테스트 결과가 휘발되지 않고</li>
+<li>어떤 환경에서 어떤 테스트가 성공하고 실패했는지 볼 수 있고</li>
+<li>분산 환경에서 각 노드(서버)가 뿜어내는 각종 로그와 각 노드가 동작하면서 생긴 부산물(예: 데이터베이스, 파일)을 다운받고 싶고</li>
+<li>각 노드가 쌓는 메트릭 정보를 수집하여 결과로도 함께 보고 싶고</li>
+<li>종합적으로 한눈에 볼 수 있었으면 하고</li>
+<li>Continuous Deployment 는 우선순위가 높지 않다.</li>
+</ul>
+
+<p>물론 kubernetes/test-infra 로 전부 다 안되도 상관없었고 일정부분 되는건 눈으로 볼 수 있었고 쉽게 확장 가능한지 보려고 했을 뿐 이다.</p>
+
+<p><strong>내가 하려는 방식</strong></p>
+
+<ul>
+<li>PR 오픈 및 변경, 매뉴얼 트리거, 주기적으로 트리거</li>
+<li>대상 브랜치의 코드를 기반으로 docker image 를 빌드하고 registry 등록</li>
+<li>다양한 (맨 위에서 언급한) 상황을 테스트하기위해 해당 구성으로 k8s client를 이용해 쿠버네티스 클러스터 내에 pod을 포함한 리소스를 띄우고</li>
+<li>쿠버네티스 클러스터에 뜬 pod의 stdout/err 를 포함한 각종 로그와 같은 부산물은 기록되고</li>
+<li>e2e 테스트 코드를 실행 (여기서 쌓이는 부산물도 기록)</li>
+<li>모든 부산물을 영구 스토리지 기록</li>
+<li>쿠버네티스 클러스터에 올린 자원 해제</li>
+</ul>
+
+<p><strong>다른 선택지</strong></p>
+
+<p>셀프 요구사항과 방식을 구현하는데 불편할 것 같아서 선택의 후보로 분류하진 않았다. 나는 kubernetes/test-infra 로 결정했지만 아래와 같은 차선책도 존재하니 참고하자. 내 경우엔 외부 서비스와 같이 노출된 곳에서 쿠버네티스 클러스터 자원 제어하는 것은 보안을 포함한 관리 등이 쉽지 않을 것 같고, 그 외에 선택지도 학습비용과 추가로 개발해야하는 비용도 만만치 않을 것 같다.</p>
+
+<ul>
+<li>CircleCI, TravisCI 와 같은 서비스</li>
+<li>Probot <sup class="footnote-ref" id="fnref:4"><a href="#fn:4">4</a></sup></li>
+<li>Spinnaker <sup class="footnote-ref" id="fnref:5"><a href="#fn:5">5</a></sup></li>
+<li>Jenkins X <sup class="footnote-ref" id="fnref:6"><a href="#fn:6">6</a></sup></li>
+</ul>
+
+<p>다음 포스트부터 좀 더 자세하게 다루겠다.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:1"><a href="https://github.com/kubernetes/test-infra/pulls">https://github.com/kubernetes/test-infra/pulls</a>
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2"><a href="https://github.com/kubernetes/kubernetes/pulls">https://github.com/kubernetes/kubernetes/pulls</a> <img src="/k8s/20180815-k8s-pulls.png" alt="k8s pulls" />
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:3"><a href="https://github.com/kubernetes/test-infra/pull/9040#event-1788833509">https://github.com/kubernetes/test-infra/pull/9040#event-1788833509</a> <img src="/k8s/20180815-k8s-pr-9040.png" alt="k8s/test-infra 9040 pr" />
+ <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:4"><a href="https://probot.github.io/">https://probot.github.io/</a> github webhook 을 이용해서 자동화 및 workflow 개선하는데 도움이 되는 도구
+ <a class="footnote-return" href="#fnref:4"><sup>[return]</sup></a></li>
+<li id="fn:5"><a href="https://www.spinnaker.io/">https://www.spinnaker.io/</a> CI/CD 도구로 꽤 유명한데 제대로 보진 못함
+ <a class="footnote-return" href="#fnref:5"><sup>[return]</sup></a></li>
+<li id="fn:6"><a href="https://jenkins-x.io/">https://jenkins-x.io/</a> CI/CD 도구로 k8s 와 접목 제대로 보진 못함.
+ <a class="footnote-return" href="#fnref:6"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+  </div>
+
+  <div id=links>
+    
+    
+  </div>
+</section>
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123964131-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</body>
+</html>
+
+
+

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Kubernetes on K</title>
-    <link>https://gnkr8.github.io/k8s/</link>
-    <description>Recent content in Kubernetes on K</description>
+    <title>Posts on K</title>
+    <link>https://gnkr8.github.io/post/</link>
+    <description>Recent content in Posts on K</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <lastBuildDate>Fri, 17 Aug 2018 00:43:14 +0900</lastBuildDate>
     
-	<atom:link href="https://gnkr8.github.io/k8s/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://gnkr8.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>자동화 e2e 테스트 환경 구축</title>
-      <link>https://gnkr8.github.io/2018/08/17/k8s-test-infra/</link>
+      <link>https://gnkr8.github.io/post/k8s-test-infra/</link>
       <pubDate>Fri, 17 Aug 2018 00:43:14 +0900</pubDate>
       
-      <guid>https://gnkr8.github.io/2018/08/17/k8s-test-infra/</guid>
+      <guid>https://gnkr8.github.io/post/k8s-test-infra/</guid>
       <description>kubernetes/test-infra 이용해서 자동화 e2e 테스트 환경 구축 이라는 주제로 첫 글
 쿠버네티스는 3개월 안팎의 빠른 릴리즈 주기, 다양한 플랫폼 지원, 사용자 입장에서 어떤 플랫폼이든 매우 유사한 사용자 경험을 제공한다. 지금도 액티브한 릴리즈 브랜치가 4개 이상 존재하고, 최근 한달 수백명의 컨트뷰터로부터 만들어지는 커밋과 수백여개의 PR, 4만여개의 스타는 커뮤니티에게 매우 큰 도움이 아닐 수 없다. 하지만 커뮤니티 owner 입장에서 본다면 리뷰와 같은 작업은 꽤 큰 노동이 될거라고 본다. 지금도 975개의 PR이 열려있고 39,766개가 처리되었다.</description>
     </item>

@@ -1,17 +1,17 @@
 [
 {
-	"uri": "https://gnkr8.github.io/2018/08/17/k8s-test-infra/",
+	"uri": "https://gnkr8.github.io/post/k8s-test-infra/",
 	"title": "자동화 e2e 테스트 환경 구축",
 	"tags": [],
 	"description": "",
 	"content": "kubernetes/test-infra 이용해서 자동화 e2e 테스트 환경 구축 이라는 주제로 첫 글\n쿠버네티스는 3개월 안팎의 빠른 릴리즈 주기, 다양한 플랫폼 지원, 사용자 입장에서 어떤 플랫폼이든 매우 유사한 사용자 경험을 제공한다. 지금도 액티브한 릴리즈 브랜치가 4개 이상 존재하고, 최근 한달 수백명의 컨트뷰터로부터 만들어지는 커밋과 수백여개의 PR, 4만여개의 스타는 커뮤니티에게 매우 큰 도움이 아닐 수 없다. 하지만 커뮤니티 owner 입장에서 본다면 리뷰와 같은 작업은 꽤 큰 노동이 될거라고 본다. 지금도 975개의 PR이 열려있고 39,766개가 처리되었다.\n커뮤니티에서 릴리즈 대상이 되는 코드가 stable 하다는 판단과 빠른 릴리즈 주기를 만족하는 모습은 깊은 인상을 준다. 노력없이는 다양한 플랫폼 지원, 동일한 사용자 경험, 무수히 많은 참여를 감당할 수 없다. 이것이 이루어지는 곳에서 쓰는 방법이나 도구가 궁금했고 대단하게도 쿠버네티스 커뮤니티에선 CLA, PR 리뷰를 위한 도구, bot, e2e 테스트, 테스트 리포트 등의 코드가 모두 공개되어있다. 대략 살펴봤을 땐 kubernetes/kubernetes 만을 위한 솔루션은 아니었다. 코드 또한 손쉽게 변경 가능했기때문에 진지하게 살펴봤다.\n이를 이용해 회사에서 만드는 제품을 다양한 상황에서 다양한 시나리오를 반복적으로 테스트하려고 한다. 내 최소 요구사항은 아래 상황을 기반으로 다양한 시나리오를 태운다. (주로 e2e test 목적)\n 정상적인 노드들과 정상적인 클라이언트 간 기능 테스트 비정상적인 클라이언트 접근 비정상적인 노드 악의적인 노드와 클라이언트가 포함된 경우 다양한 네트워크 구성  먼저, 쿠버네티스 커뮤니티에서 공개한 코드에대한 소개부터.\n         Language Go   Github https://github.com/kubernetes/test-infra   Prow Web UI https://prow.k8s.io/    kubernetes pull requests 1 2 중 몇몇 PR을 보면 k8s-ci-robot 계정과 리뷰어의 활동을 볼 수 있다. 대화형 방식으로 진행하는 걸 볼 수 있고 각 Job 실행이 성공적으로 끝나는지 체크한다. 그 외에 CLA 체크도 하고 머지를 할 수 있나 검증도 한다. 3\n내 요구사항\n e2e 테스트 결과가 휘발되지 않고 어떤 환경에서 어떤 테스트가 성공하고 실패했는지 볼 수 있고 분산 환경에서 각 노드(서버)가 뿜어내는 각종 로그와 각 노드가 동작하면서 생긴 부산물(예: 데이터베이스, 파일)을 다운받고 싶고 각 노드가 쌓는 메트릭 정보를 수집하여 결과로도 함께 보고 싶고 종합적으로 한눈에 볼 수 있었으면 하고 Continuous Deployment 는 우선순위가 높지 않다.  물론 kubernetes/test-infra 로 전부 다 안되도 상관없었고 일정부분 되는건 눈으로 볼 수 있었고 쉽게 확장 가능한지 보려고 했을 뿐 이다.\n내가 하려는 방식\n PR 오픈 및 변경, 매뉴얼 트리거, 주기적으로 트리거 대상 브랜치의 코드를 기반으로 docker image 를 빌드하고 registry 등록 다양한 (맨 위에서 언급한) 상황을 테스트하기위해 해당 구성으로 k8s client를 이용해 쿠버네티스 클러스터 내에 pod을 포함한 리소스를 띄우고 쿠버네티스 클러스터에 뜬 pod의 stdout/err 를 포함한 각종 로그와 같은 부산물은 기록되고 e2e 테스트 코드를 실행 (여기서 쌓이는 부산물도 기록) 모든 부산물을 영구 스토리지 기록 쿠버네티스 클러스터에 올린 자원 해제  다른 선택지\n셀프 요구사항과 방식을 구현하는데 불편할 것 같아서 선택의 후보로 분류하진 않았다. 나는 kubernetes/test-infra 로 결정했지만 아래와 같은 차선책도 존재하니 참고하자. 내 경우엔 외부 서비스와 같이 노출된 곳에서 쿠버네티스 클러스터 자원 제어하는 것은 보안을 포함한 관리 등이 쉽지 않을 것 같고, 그 외에 선택지도 학습비용과 추가로 개발해야하는 비용도 만만치 않을 것 같다.\n CircleCI, TravisCI 와 같은 서비스 Probot 4 Spinnaker 5 Jenkins X 6  다음 포스트부터 좀 더 자세하게 다루겠다.\n https://github.com/kubernetes/test-infra/pulls [return] https://github.com/kubernetes/kubernetes/pulls [return] https://github.com/kubernetes/test-infra/pull/9040#event-1788833509 [return] https://probot.github.io/ github webhook 을 이용해서 자동화 및 workflow 개선하는데 도움이 되는 도구 [return] https://www.spinnaker.io/ CI/CD 도구로 꽤 유명한데 제대로 보진 못함 [return] https://jenkins-x.io/ CI/CD 도구로 k8s 와 접목 제대로 보진 못함. [return]   "
 },
 {
-	"uri": "https://gnkr8.github.io/",
-	"title": "Home",
+	"uri": "https://gnkr8.github.io/about/",
+	"title": "About",
 	"tags": [],
 	"description": "",
-	"content": " Home 원래 관심이 많았던 kubernetes 소재와 최근 급 관심을 가지고 있는 hashicorp products, flutter 와 go, dart 언어를 공부하면서 기록합니다.\nKubernetes\n이제 유명한 프로덕트 https://kubernetes.io\nHashicorp\nterraform, consul, vault, nomad, packer, vagrant 등 유용한 opensource tools 만든 회사 https://www.hashicorp.com/\nFlutter\nhttps://flutter.io/\nLanguages\n https://golang.org/ https://www.dartlang.org/  "
+	"content": "원래 관심이 많았던 kubernetes 소재와 최근 급 관심을 가지고 있는 hashicorp products, flutter 와 go, dart 언어를 공부하면서 기록합니다.\nKubernetes\n이제 유명한 프로덕트 https://kubernetes.io\nHashicorp\nterraform, consul, vault, nomad, packer, vagrant 등 유용한 opensource tools 만든 회사 https://www.hashicorp.com/\nFlutter\nhttps://flutter.io/\nLanguages\n https://golang.org/ https://www.dartlang.org/  "
 },
 {
 	"uri": "https://gnkr8.github.io/categories/",
@@ -21,11 +21,18 @@
 	"content": ""
 },
 {
-	"uri": "https://gnkr8.github.io/k8s/",
-	"title": "Kubernetes",
+	"uri": "https://gnkr8.github.io/",
+	"title": "K",
 	"tags": [],
 	"description": "",
-	"content": "자동화 e2e 테스트 환경 구축\n"
+	"content": ""
+},
+{
+	"uri": "https://gnkr8.github.io/post/",
+	"title": "Posts",
+	"tags": [],
+	"description": "",
+	"content": ""
 },
 {
 	"uri": "https://gnkr8.github.io/tags/",
